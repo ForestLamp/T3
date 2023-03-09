@@ -7,23 +7,28 @@
 
 import UIKit
 
-class ViewController: UIViewController {
+final class ViewController: UIViewController {
+    
+    private let layoutMarigns = UIEdgeInsets(top: 50, left: 16, bottom: 0, right: 16)
     
     private lazy var cubeView = View()
-    private lazy var transformSlider = UISlider(frame: CGRect(x: 20, y: 250, width: view.frame.width - 40, height: 40))
+    private lazy var transformSlider: UISlider = {
+       let slider = UISlider()
+        slider.minimumValue = 0
+        slider.maximumValue = 1
+        slider.addTarget(self, action: #selector(transformCubeView(slider:event:)), for: .valueChanged)
+        return slider
+    }()
+
     
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .secondarySystemBackground
-        cubeView.frame = .init(x: 20, y: 100, width: 100, height: 100)
-        view.addSubview(cubeView)
-        view.addSubview(transformSlider)
-        transformSlider.minimumValue = 0
-        transformSlider.maximumValue = 1
-        transformSlider.addTarget(self, action: #selector(transformCubeView(slider:event:)), for: .valueChanged)
+        view.layoutMargins = layoutMarigns
+        makeConstraints()
     }
     
-    @objc func transformCubeView(slider: UISlider, event: UIEvent){
+    @objc private func transformCubeView(slider: UISlider, event: UIEvent){
         if let touchEvent = event.allTouches?.first {
             switch touchEvent.phase {
             case .began:
@@ -49,7 +54,7 @@ class ViewController: UIViewController {
         }
     }
     
-    func getTransform(for slider: UISlider) -> CGAffineTransform {
+    private func getTransform(for slider: UISlider) -> CGAffineTransform {
         var transform = CGAffineTransform.identity
         let angle = CGFloat(slider.value) * .pi / 2
         let width = UIScreen.main.bounds.width
@@ -61,6 +66,23 @@ class ViewController: UIViewController {
         transform = transform.concatenating(moveRightTransform)
         viewDidLayoutSubviews()
         return transform
+    }
+    
+    private func makeConstraints() {
+        view.addSubview(cubeView)
+        view.addSubview(transformSlider)
+        
+        cubeView.translatesAutoresizingMaskIntoConstraints = false
+        transformSlider.translatesAutoresizingMaskIntoConstraints = false
+        
+        cubeView.widthAnchor.constraint(equalToConstant: 100).isActive = true
+        cubeView.heightAnchor.constraint(equalToConstant: 100).isActive = true
+        cubeView.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor).isActive = true
+        cubeView.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor).isActive = true
+        
+        transformSlider.leftAnchor.constraint(equalTo: view.layoutMarginsGuide.leftAnchor).isActive = true
+        transformSlider.rightAnchor.constraint(equalTo: view.layoutMarginsGuide.rightAnchor).isActive = true
+        transformSlider.topAnchor.constraint(equalTo: view.layoutMarginsGuide.topAnchor, constant: 140).isActive = true
     }
 }
 
